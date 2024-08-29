@@ -10,11 +10,12 @@ class Player:
         self.anim.update()
         
 class Interactable:
-    def __init__(self, anim, func, draw, pos):
+    def __init__(self, anim, func, draw, pos, light):
         self.func = func
         self.draw = draw
         self.anim = anim
         self.pos = pos
+        self.light = light
 
 
 class non_Interactable:
@@ -29,6 +30,21 @@ def draw_candle(anim, pos, light):
     lighting.blit(light, (((pos[0] - camera_pos)*w_ratio)-410,(pos[1]*h_ratio-440)), special_flags=pygame.BLEND_RGB_ADD)
     anim.update()
 
+def draw_orb(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
+    lighting.blit(light, (((pos[0] - camera_pos)*w_ratio-100),(pos[1]*h_ratio-130)), special_flags=pygame.BLEND_RGB_ADD)
+    anim.update()
+
+def orb_interact():
+    pass
+
+def draw_important_potion(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
+    lighting.blit(light, (((pos[0] - camera_pos)*w_ratio)-5,(pos[1]*h_ratio)), special_flags=pygame.BLEND_RGB_ADD)
+    anim.update()
+
+def important_potion_interact():
+    pass
 
 
 def play_game():
@@ -41,17 +57,34 @@ def play_game():
     wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
     wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
     cauldron_idle = Animation(Utils.load_images("assets/sprites/cauldron/idle"), img_dur=6)
+    orb_idle = Animation(Utils.load_images("assets/sprites/orb/idle"), img_dur=8)
+    important_potion_idle = Animation(Utils.load_images("assets/sprites/important potion/idle"), img_dur=6)
     player = Player(wizard_idle)
+    '''
+    LIGHTING
+    '''
     candle_glow = pygame.Surface((1000,1000))
     for i in range(100):
-            pygame.draw.circle(candle_glow, (i*251*0.01, i*164*0.01, i*50*0.01), (500,500), 500 - i * 5)
+        pygame.draw.circle(candle_glow, (i*251*0.01, i*164*0.01, i*50*0.01), (500,500), 500 - i * 5)
+    orb_glow = pygame.Surface((400,400))
+    for i in range(100):
+        pygame.draw.circle(orb_glow, (i*50*0.01, i*104*0.01, i*251*0.01), (200,200), 120 - i * 1)
+    potion_glow = pygame.Surface((200,200))
+    for i in range(100):
+        pygame.draw.circle(potion_glow, (i*250*0.01, i*104*0.01, i*200*0.01), (100,100), 60 - i * 1)
+
+    '''
+    OBJECTS
+    '''
     candle = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (70, 140), candle_glow)
-    candle2 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (180, 100), candle_glow)
+    candle2 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (180, 120), candle_glow)
     candle3 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (280, 140), candle_glow)
+    orb = Interactable(orb_idle, orb_interact, draw_orb, (120,170), orb_glow)
+    important_potion = Interactable(important_potion_idle, important_potion_interact, draw_important_potion, (210,157), potion_glow)
     for i in range(12):
         candle2.anim.update()
     non_interactables = [candle, candle2, candle3]
-    
+    interactables = [orb, important_potion]
     '''
     MAIN LOOP
     '''
@@ -60,11 +93,13 @@ def play_game():
         '''
         DRAW
         '''
-        lighting.fill((20,20,20))
+        lighting.fill((10,10,10))
         display.fill((255,255,255))
         display.blit(room_bg, (0-camera_pos,0))
         for non_interactable in non_interactables:
             non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
+        for interactable in interactables:
+            interactable.draw(interactable.anim, interactable.pos, interactable.light)
         player.draw(display)
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
         screen.blit(lighting, (0,0), special_flags=pygame.BLEND_RGB_MULT)
