@@ -8,7 +8,7 @@ def circle_surf(color, center, radius):
 
 def load_images(filepath):
     arr = []
-    for img in os.listdir(filepath):
+    for img in sorted(os.listdir(filepath)):
         arr.append(pygame.image.load(filepath + '/' + img))
     return arr
 

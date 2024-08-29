@@ -51,7 +51,7 @@ def play_game():
     for i in range(12):
         candle2.anim.update()
     non_interactables = [candle, candle2, candle3]
-
+    
     '''
     MAIN LOOP
     '''
@@ -90,7 +90,7 @@ def play_game():
         elif keys[pygame.K_d]:
             player.anim = wizard_walk_right
             player.pos = (player.pos[0] + 1,player.pos[1])
-        else:
+        elif player.anim != wizard_idle:
             player.anim = wizard_idle
 
         '''
