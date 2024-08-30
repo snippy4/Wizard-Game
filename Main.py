@@ -46,6 +46,19 @@ def draw_important_potion(anim, pos, light):
 def important_potion_interact():
     pass
 
+def draw_caludron(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
+    lighting.blit(light, (((pos[0] - camera_pos)*w_ratio-100),(pos[1]*h_ratio-100)), special_flags=pygame.BLEND_RGB_ADD)
+    anim.update()
+
+def cauldron_interact():
+    pass
+
+def door_interact():
+    pass
+
+def draw_door(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
 
 def play_game():
     '''
@@ -59,6 +72,7 @@ def play_game():
     cauldron_idle = Animation(Utils.load_images("assets/sprites/cauldron/idle"), img_dur=6)
     orb_idle = Animation(Utils.load_images("assets/sprites/orb/idle"), img_dur=8)
     important_potion_idle = Animation(Utils.load_images("assets/sprites/important potion/idle"), img_dur=6)
+    door_img = Animation([Utils.load_image("assets/sprites/door.png")])
     player = Player(wizard_idle)
     '''
     LIGHTING
@@ -72,6 +86,13 @@ def play_game():
     potion_glow = pygame.Surface((200,200))
     for i in range(100):
         pygame.draw.circle(potion_glow, (i*250*0.01, i*104*0.01, i*200*0.01), (100,100), 60 - i * 1)
+    cauldron_glow = pygame.Surface((400,400))
+    for i in range(100):
+        pygame.draw.circle(cauldron_glow, (i*250*0.01, i*164*0.01, i*50*0.01), (200,200), 200 - i * 2)
+    window_light = pygame.Surface((1200,1200))
+    for i in range(100):
+        pygame.draw.circle(window_light, (i*220*0.01, i*255*0.01, i*220*0.01), (550,550), 550 - i * 5)
+    
 
     '''
     OBJECTS
@@ -80,11 +101,13 @@ def play_game():
     candle2 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (180, 120), candle_glow)
     candle3 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (280, 140), candle_glow)
     orb = Interactable(orb_idle, orb_interact, draw_orb, (120,170), orb_glow)
-    important_potion = Interactable(important_potion_idle, important_potion_interact, draw_important_potion, (210,157), potion_glow)
+    cauldron = Interactable(cauldron_idle, cauldron_interact, draw_caludron, (200,200), cauldron_glow)
+    important_potion = Interactable(important_potion_idle, important_potion_interact, draw_important_potion, (170,157), potion_glow)
     for i in range(12):
         candle2.anim.update()
-    non_interactables = [candle, candle2, candle3]
-    interactables = [orb, important_potion]
+    door = Interactable(door_img, door_interact, draw_door, (330,165), None)
+    non_interactables = [candle, candle2]
+    interactables = [orb, important_potion, cauldron, door]
     '''
     MAIN LOOP
     '''
@@ -93,19 +116,25 @@ def play_game():
         '''
         DRAW
         '''
+
+        interactions = []
         lighting.fill((10,10,10))
         display.fill((255,255,255))
+        lighting.blit(window_light, (((225 - camera_pos)*w_ratio-100),(50*h_ratio-100)), special_flags=pygame.BLEND_RGB_ADD)
         display.blit(room_bg, (0-camera_pos,0))
         for non_interactable in non_interactables:
             non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
         for interactable in interactables:
             interactable.draw(interactable.anim, interactable.pos, interactable.light)
+            if(pygame.mask.from_surface(interactable.anim.img()).overlap_mask(pygame.mask.from_surface(player.anim.img()), (interactable.pos[0]-player.pos[0],0)).count()):
+                interactions = [interactable]
         player.draw(display)
         screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
         screen.blit(lighting, (0,0), special_flags=pygame.BLEND_RGB_MULT)
+        for interactable in interactions:
+            pygame.draw.rect(screen, (255,255,255), ((interactable.pos[0]-camera_pos)*w_ratio,interactable.pos[1]*h_ratio, 50, 50), 5)
+            screen.blit(font.render("F", False, (255,255,255)),((interactable.pos[0]-camera_pos)*w_ratio + 15,interactable.pos[1]*h_ratio + 15))
         pygame.display.flip()
-
-
 
         '''
         ACTIONS
@@ -115,7 +144,7 @@ def play_game():
                 sys.exit()
             if event.type == pygame.MOUSEBUTTONDOWN:
                 pass
-        
+      
         keys = pygame.key.get_pressed()          
         if keys[pygame.K_ESCAPE]:
             running = False
