@@ -60,11 +60,20 @@ def door_interact():
 def draw_door(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
 
-def play_game():
+def telescope_interact():
+    pass
+
+def draw_telescope(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
+    anim.update()
+
+
+
+def load_room():
     '''
     LOAD ROOM
     '''
-    global camera_pos
+    global camera_pos, frame_count
     room_bg = Utils.load_image("assets/backgrounds/room.png")
     wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
     wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
@@ -99,15 +108,16 @@ def play_game():
     '''
     candle = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (70, 140), candle_glow)
     candle2 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (180, 120), candle_glow)
-    candle3 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (280, 140), candle_glow)
+    candle3 = non_Interactable(Animation(Utils.load_images("assets/sprites/candle"), img_dur=6), draw_candle, (320, 140), candle_glow)
     orb = Interactable(orb_idle, orb_interact, draw_orb, (120,170), orb_glow)
     cauldron = Interactable(cauldron_idle, cauldron_interact, draw_caludron, (200,200), cauldron_glow)
+    telescope = Interactable(Animation(Utils.load_images("assets/sprites/telescope"), img_dur=10), telescope_interact, draw_telescope, (270, 200), None)
     important_potion = Interactable(important_potion_idle, important_potion_interact, draw_important_potion, (170,157), potion_glow)
     for i in range(12):
         candle2.anim.update()
     door = Interactable(door_img, door_interact, draw_door, (330,165), None)
-    non_interactables = [candle, candle2]
-    interactables = [orb, important_potion, cauldron, door]
+    non_interactables = [candle, candle2, candle3]
+    interactables = [orb, important_potion, cauldron, door, telescope]
     '''
     MAIN LOOP
     '''
@@ -116,11 +126,13 @@ def play_game():
         '''
         DRAW
         '''
-
+        time = (frame_count%36000)/36000
+        timedecimal = math.sin((time-0.05)*math.pi)
         interactions = []
         lighting.fill((10,10,10))
-        display.fill((255,255,255))
-        lighting.blit(window_light, (((225 - camera_pos)*w_ratio-100),(50*h_ratio-100)), special_flags=pygame.BLEND_RGB_ADD)
+        display.fill(Utils.get_day_night_cycle_color(time))
+        if 0.15 < time < 0.85: 
+            lighting.blit(pygame.transform.scale(window_light, (window_light.get_width()*timedecimal, window_light.get_height()*timedecimal)), (((300 - camera_pos)*w_ratio-600*timedecimal),(150*h_ratio-600*timedecimal)), special_flags=pygame.BLEND_RGB_ADD)
         display.blit(room_bg, (0-camera_pos,0))
         for non_interactable in non_interactables:
             non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
@@ -162,7 +174,16 @@ def play_game():
         '''
         if abs(player.pos[0] - camera_pos - 100) > 50:
             camera_pos += math.floor((player.pos[0] - camera_pos - 100) * 0.01)
+            if camera_pos < 0:
+                camera_pos = 0
+            elif camera_pos > 80:
+                camera_pos = 80
         clock.tick(60)
+
+        '''
+        OTHER CALCULATIONS
+        '''
+        frame_count += 1
 
 pygame.init()
 '''
@@ -175,7 +196,8 @@ lighting = pygame.Surface((screen.get_size()))
 w_ratio = screen.get_width() / display.get_width()
 h_ratio = screen.get_height() / display.get_height()
 font = pygame.font.Font("assets/fonts/kongtext.ttf", 24)
-camera_pos = -30
+camera_pos = 0
+frame_count = 0
 
 '''
 MENU SCREEN
@@ -204,7 +226,7 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.Rect(screen.get_width()/2-200, screen.get_height()/2-50, play_button.get_width(), play_button.get_height()).collidepoint(pygame.mouse.get_pos()):
-                play_game() 
+                load_room() 
     if pygame.Rect(screen.get_width()/2-200, screen.get_height()/2-50, play_button.get_width(), play_button.get_height()).collidepoint(pygame.mouse.get_pos()):
         play_button.fill((140,140,140))
         pygame.draw.rect(play_button, (0,0,0), (0,0,400,100), width=2)
