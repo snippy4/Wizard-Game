@@ -25,6 +25,44 @@ class non_Interactable:
         self.pos = pos
         self.light = light
 
+def text_scene(text, character):
+    run = True
+    current_text = ""
+    current_text2 = ""
+    i = 0
+    while run:
+        
+        screen.blit(pygame.transform.scale(text_box, (600, 200)), (700, screen.get_height()-200))
+        screen.blit(pygame.transform.scale(character, (200,200)), (690, screen.get_height()-200))
+        if i <= 17:
+            screen.blit(font.render(current_text, False, (0,0,0)),(860,screen.get_height()-180), )
+        if i > 17:
+            screen.blit(font.render(current_text, False, (0,0,0)),(860,screen.get_height()-180), )
+            screen.blit(font.render(current_text2, False, (0,0,0)),(860,screen.get_height()-120), )            
+        pygame.display.flip()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN]:
+            if i >= len(text) + 4:
+                run = False
+
+            elif 6 < i:
+                current_text = text[:16]
+                current_text2 = text[17:]
+                i = len(text)
+        for event in pygame.event.get():
+            pass
+        if len(current_text) + len(current_text2) < len(text):
+            if i < 17:
+                current_text += text[i]
+            elif len(text) > i >= 17:
+                current_text2 += text[i]
+            
+        i += 1
+        clock.tick(20)
+    
+
+
+
 def draw_candle(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
     lighting.blit(light, (((pos[0] - camera_pos)*w_ratio)-410,(pos[1]*h_ratio-440)), special_flags=pygame.BLEND_RGB_ADD)
@@ -55,7 +93,9 @@ def cauldron_interact():
     pass
 
 def door_interact():
-    pass
+    wizard = Utils.load_image("assets/sprites/wizard face.png")
+    text_scene("the door doesnt  seem to work yet", wizard)
+    text_scene("maybe come back  later :(", wizard)
 
 def draw_door(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -168,7 +208,9 @@ def load_room():
             player.pos = (player.pos[0] + 1,player.pos[1])
         elif player.anim != wizard_idle:
             player.anim = wizard_idle
-
+        if keys[pygame.K_f]:
+            for interaction in interactions:
+                interaction.func()
         '''
         CAMERA MOVEMENT
         '''
@@ -198,6 +240,7 @@ h_ratio = screen.get_height() / display.get_height()
 font = pygame.font.Font("assets/fonts/kongtext.ttf", 24)
 camera_pos = 0
 frame_count = 0
+text_box = Utils.load_image("assets/sprites/text box.png")
 
 '''
 MENU SCREEN
