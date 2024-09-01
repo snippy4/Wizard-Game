@@ -166,7 +166,7 @@ def load_room():
         '''
         DRAW
         '''
-        time = (frame_count%36000)/36000
+        time = (frame_count%18000)/18000
         timedecimal = math.sin((time-0.05)*math.pi)
         interactions = []
         lighting.fill((10,10,10))
