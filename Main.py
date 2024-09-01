@@ -107,6 +107,10 @@ def draw_telescope(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
     anim.update()
 
+def draw_tower(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
+    anim.update()
+
 
 
 def load_room():
@@ -123,6 +127,7 @@ def load_room():
     important_potion_idle = Animation(Utils.load_images("assets/sprites/important potion/idle"), img_dur=6)
     door_img = Animation([Utils.load_image("assets/sprites/door.png")])
     player = Player(wizard_idle)
+
     '''
     LIGHTING
     '''
