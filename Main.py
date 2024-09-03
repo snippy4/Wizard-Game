@@ -61,7 +61,9 @@ def text_scene(text, character):
         clock.tick(20)
     
 
-
+'''
+ROOM FUNCTIONS
+'''
 
 def draw_candle(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -96,6 +98,7 @@ def door_interact():
     wizard = Utils.load_image("assets/sprites/wizard face.png")
     text_scene("the door doesnt  seem to work yet", wizard)
     text_scene("maybe come back  later :(", wizard)
+    load_path()
 
 def draw_door(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -111,6 +114,14 @@ def draw_tower(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
     anim.update()
 
+'''
+GAME LOOPS
+'''
+
+
+def load_path():
+    print("path loaded")
+    #insert game loop here
 
 
 def load_room():
