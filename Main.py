@@ -120,8 +120,82 @@ GAME LOOPS
 
 
 def load_path():
-    print("path loaded")
-    #insert game loop here
+    '''
+    LOAD PATH
+    '''
+    global frame_count, camera_pos
+    wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
+    wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
+    wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
+    wizard_tower = non_Interactable(Animation(Utils.load_images("assets/sprites/tower/idle"), img_dur=6), draw_tower, (40, 0), None)
+    player = Player(wizard_idle)
+    non_interactables = [wizard_tower]
+    interactables = []
+    '''
+    MAIN LOOP
+    '''
+    running = True
+    while running:
+        '''
+        DRAW
+        '''
+        time = (frame_count%18000)/18000
+        timedecimal = math.sin((time-0.05)*math.pi)
+        interactions = []
+        lighting.fill((100,100,100))
+        display.fill(Utils.get_day_night_cycle_color(time))
+        for non_interactable in non_interactables:
+            non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
+        for interactable in interactables:
+            interactable.draw(interactable.anim, interactable.pos, interactable.light)
+            if(pygame.mask.from_surface(interactable.anim.img()).overlap_mask(pygame.mask.from_surface(player.anim.img()), (interactable.pos[0]-player.pos[0],0)).count()):
+                interactions = [interactable]
+        player.draw(display)
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
+        screen.blit(lighting, (0,0), special_flags=pygame.BLEND_RGB_MULT)
+        for interactable in interactions:
+            pygame.draw.rect(screen, (255,255,255), ((interactable.pos[0]-camera_pos)*w_ratio,interactable.pos[1]*h_ratio, 50, 50), 5)
+            screen.blit(font.render("F", False, (255,255,255)),((interactable.pos[0]-camera_pos)*w_ratio + 15,interactable.pos[1]*h_ratio + 15))
+        pygame.display.flip()
+
+        '''
+        ACTIONS
+        '''
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pass
+      
+        keys = pygame.key.get_pressed()          
+        if keys[pygame.K_ESCAPE]:
+            running = False
+        if keys[pygame.K_a]:
+            player.anim = wizard_walk_left
+            player.pos = (player.pos[0] - 1,player.pos[1])
+        elif keys[pygame.K_d]:
+            player.anim = wizard_walk_right
+            player.pos = (player.pos[0] + 1,player.pos[1])
+        elif player.anim != wizard_idle:
+            player.anim = wizard_idle
+        if keys[pygame.K_f]:
+            for interaction in interactions:
+                interaction.func()
+        '''
+        CAMERA MOVEMENT
+        '''
+        if abs(player.pos[0] - camera_pos - 100) > 50:
+            camera_pos += math.floor((player.pos[0] - camera_pos - 100) * 0.01)
+            if camera_pos < 0:
+                camera_pos = 0
+            elif camera_pos > 80:
+                camera_pos = 80
+        clock.tick(60)
+
+        '''
+        OTHER CALCULATIONS
+        '''
+        frame_count += 1
 
 
 def load_room():
