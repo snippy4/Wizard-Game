@@ -76,7 +76,9 @@ def draw_orb(anim, pos, light):
     anim.update()
 
 def orb_interact():
-    pass
+    wizard = Utils.load_image("assets/sprites/wizard face.png")
+    text_scene("the orb doesnt  seem to work yet", wizard)
+    text_scene("maybe come back  later :(", wizard)
 
 def draw_important_potion(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -92,25 +94,30 @@ def draw_caludron(anim, pos, light):
     anim.update()
 
 def cauldron_interact():
-    pass
+    wizard = Utils.load_image("assets/sprites/wizard face.png")
+    text_scene("the cauldron doesnt seem to work yet", wizard)
+    text_scene("maybe come back  later :(", wizard)
 
 def door_interact():
-    wizard = Utils.load_image("assets/sprites/wizard face.png")
-    text_scene("the door doesnt  seem to work yet", wizard)
-    text_scene("maybe come back  later :(", wizard)
     load_path()
 
 def draw_door(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
 
 def telescope_interact():
-    pass
+    wizard = Utils.load_image("assets/sprites/wizard face.png")
+    text_scene("the telescope doesnt seem to work yet", wizard)
+    text_scene("maybe come back  later :(", wizard)
 
 def draw_telescope(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
     anim.update()
 
 def draw_tower(anim, pos, light):
+    display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
+    anim.update()
+
+def draw_bush(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
     anim.update()
 
@@ -127,9 +134,17 @@ def load_path():
     wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
     wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
     wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
-    wizard_tower = non_Interactable(Animation(Utils.load_images("assets/sprites/tower/idle"), img_dur=6), draw_tower, (40, 0), None)
+    wizard_tower = non_Interactable(Animation(Utils.load_images("assets/sprites/tower/idle"), img_dur=6), draw_tower, (40, -12), None)
+    bush = non_Interactable(Animation(Utils.load_images("assets/sprites/bush"), img_dur=5), draw_bush, (200, 202), None)
+    bush2 = non_Interactable(Animation(Utils.load_images("assets/sprites/bush"), img_dur=5), draw_bush, (300, 202), None)
+    tree = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (250, 114), None)
+    tree2 = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (350, 114), None)
+    path_bg = Utils.load_image("assets/backgrounds/path bg.png")
     player = Player(wizard_idle)
-    non_interactables = [wizard_tower]
+    for i in range(14):
+        tree2.anim.update()
+        bush2.anim.update()
+    non_interactables = [wizard_tower, bush, bush2, tree, tree2]
     interactables = []
     '''
     MAIN LOOP
@@ -140,10 +155,10 @@ def load_path():
         DRAW
         '''
         time = (frame_count%18000)/18000
-        timedecimal = math.sin((time-0.05)*math.pi)
         interactions = []
         lighting.fill((100,100,100))
         display.fill(Utils.get_day_night_cycle_color(time))
+        display.blit(path_bg, (0-camera_pos,0))
         for non_interactable in non_interactables:
             non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
         for interactable in interactables:
@@ -188,8 +203,8 @@ def load_path():
             camera_pos += math.floor((player.pos[0] - camera_pos - 100) * 0.01)
             if camera_pos < 0:
                 camera_pos = 0
-            elif camera_pos > 80:
-                camera_pos = 80
+            elif camera_pos > 180:
+                camera_pos = 180
         clock.tick(60)
 
         '''
