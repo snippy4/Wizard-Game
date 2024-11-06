@@ -1,4 +1,4 @@
-# 🧙 Wizard Game
+# Wizard Game
 
 A wizard room game with further asperations made in python with pygame.
 
