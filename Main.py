@@ -155,8 +155,9 @@ def load_path():
         DRAW
         '''
         time = (frame_count%18000)/18000
+        timedecimal = math.sin((time-0.05)*math.pi)
         interactions = []
-        lighting.fill((100,100,100))
+        lighting.fill((100+50*timedecimal,100+50*timedecimal,100+50*timedecimal))
         display.fill(Utils.get_day_night_cycle_color(time))
         display.blit(path_bg, (0-camera_pos,0))
         for non_interactable in non_interactables:
