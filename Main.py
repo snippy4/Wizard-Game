@@ -99,7 +99,7 @@ def cauldron_interact():
     text_scene("maybe come back  later :(", wizard)
 
 def door_interact():
-    load_path()
+    return "path"
 
 def draw_door(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -125,6 +125,16 @@ def draw_bush(anim, pos, light):
 GAME LOOPS
 '''
 
+def state_loop():
+    next_state = "room"
+    while True:
+        if next_state == "room":
+            next_state = load_room()
+        elif next_state == "path":
+            next_state = load_path()
+        elif next_state == "exit":
+            sys.exit(0)
+
 
 def load_path():
     '''
@@ -141,6 +151,7 @@ def load_path():
     tree2 = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (350, 114), None)
     path_bg = Utils.load_image("assets/backgrounds/path bg.png")
     player = Player(wizard_idle)
+    state = None
     for i in range(14):
         tree2.anim.update()
         bush2.anim.update()
@@ -185,7 +196,7 @@ def load_path():
       
         keys = pygame.key.get_pressed()          
         if keys[pygame.K_ESCAPE]:
-            running = False
+            return "exit"
         if keys[pygame.K_a]:
             player.anim = wizard_walk_left
             player.pos = (player.pos[0] - 1,player.pos[1])
@@ -228,6 +239,7 @@ def load_room():
     important_potion_idle = Animation(Utils.load_images("assets/sprites/important potion/idle"), img_dur=6)
     door_img = Animation([Utils.load_image("assets/sprites/door.png")])
     player = Player(wizard_idle)
+    state = None
 
     '''
     LIGHTING
@@ -305,7 +317,7 @@ def load_room():
       
         keys = pygame.key.get_pressed()          
         if keys[pygame.K_ESCAPE]:
-            running = False
+            return "exit"
         if keys[pygame.K_a]:
             player.anim = wizard_walk_left
             player.pos = (player.pos[0] - 1,player.pos[1])
@@ -316,7 +328,9 @@ def load_room():
             player.anim = wizard_idle
         if keys[pygame.K_f]:
             for interaction in interactions:
-                interaction.func()
+                result = interaction.func()
+                if result is not None:
+                    state = result
         '''
         CAMERA MOVEMENT
         '''
@@ -331,6 +345,8 @@ def load_room():
         '''
         OTHER CALCULATIONS
         '''
+        if state == "path":
+            return "path"
         frame_count += 1
 
 pygame.init()
@@ -375,7 +391,7 @@ while running:
             running = False
         if event.type == pygame.MOUSEBUTTONDOWN:
             if pygame.Rect(screen.get_width()/2-200, screen.get_height()/2-50, play_button.get_width(), play_button.get_height()).collidepoint(pygame.mouse.get_pos()):
-                load_room() 
+                state_loop()
     if pygame.Rect(screen.get_width()/2-200, screen.get_height()/2-50, play_button.get_width(), play_button.get_height()).collidepoint(pygame.mouse.get_pos()):
         play_button.fill((140,140,140))
         pygame.draw.rect(play_button, (0,0,0), (0,0,400,100), width=2)
