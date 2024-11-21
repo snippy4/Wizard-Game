@@ -1,4 +1,4 @@
-import pygame, Utils, sys, math
+import pygame, Utils, sys, math, time as T
 from Animation import Animation
 
 class Player:
@@ -98,8 +98,11 @@ def cauldron_interact():
     text_scene("the cauldron doesnt seem to work yet", wizard)
     text_scene("maybe come back  later :(", wizard)
 
-def door_interact():
+def room_door_interact():
     return "path"
+
+def path_door_interact():
+    return "room"
 
 def draw_door(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -140,11 +143,13 @@ def load_path():
     '''
     LOAD PATH
     '''
-    global frame_count, camera_pos
+    global frame_count, camera_pos, T
     wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
     wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
     wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
     wizard_tower = non_Interactable(Animation(Utils.load_images("assets/sprites/tower/idle"), img_dur=6), draw_tower, (40, -12), None)
+    door_img = Animation([Utils.load_image("assets/sprites/door.png")])
+    door = Interactable(door_img, path_door_interact, draw_door, (60,165), None)
     bush = non_Interactable(Animation(Utils.load_images("assets/sprites/bush"), img_dur=5), draw_bush, (200, 202), None)
     bush2 = non_Interactable(Animation(Utils.load_images("assets/sprites/bush"), img_dur=5), draw_bush, (300, 202), None)
     tree = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (250, 114), None)
@@ -156,10 +161,11 @@ def load_path():
         tree2.anim.update()
         bush2.anim.update()
     non_interactables = [wizard_tower, bush, bush2, tree, tree2]
-    interactables = []
+    interactables = [door]
     '''
     MAIN LOOP
     '''
+    T.sleep(0.1)
     running = True
     while running:
         '''
@@ -207,7 +213,9 @@ def load_path():
             player.anim = wizard_idle
         if keys[pygame.K_f]:
             for interaction in interactions:
-                interaction.func()
+                result = interaction.func()
+                if result is not None:
+                    state = result
         '''
         CAMERA MOVEMENT
         '''
@@ -222,6 +230,8 @@ def load_path():
         '''
         OTHER CALCULATIONS
         '''
+        if state == "room":
+            return "room"
         frame_count += 1
 
 
@@ -273,7 +283,7 @@ def load_room():
     important_potion = Interactable(important_potion_idle, important_potion_interact, draw_important_potion, (170,157), potion_glow)
     for i in range(12):
         candle2.anim.update()
-    door = Interactable(door_img, door_interact, draw_door, (330,165), None)
+    door = Interactable(door_img, room_door_interact, draw_door, (330,165), None)
     non_interactables = [candle, candle2, candle3]
     interactables = [orb, important_potion, cauldron, door, telescope]
     '''
