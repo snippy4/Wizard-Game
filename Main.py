@@ -124,6 +124,9 @@ def draw_bush(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
     anim.update()
 
+def draw_sun(anim, pos, light):
+    display.blit(anim.img(), (pos[0]-camera_pos, pos[1]))
+    anim.update()
 '''
 GAME LOOPS
 '''
@@ -154,13 +157,14 @@ def load_path():
     bush2 = non_Interactable(Animation(Utils.load_images("assets/sprites/bush"), img_dur=5), draw_bush, (300, 202), None)
     tree = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (250, 114), None)
     tree2 = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (350, 114), None)
+    sun = non_Interactable(Animation([Utils.load_image("assets/sprites/sun.png")], img_dur=99), draw_sun, (300,40), None)
     path_bg = Utils.load_image("assets/backgrounds/path bg.png")
     player = Player(wizard_idle)
     state = None
     for i in range(14):
         tree2.anim.update()
         bush2.anim.update()
-    non_interactables = [wizard_tower, bush, bush2, tree, tree2]
+    non_interactables = [wizard_tower, bush, bush2, tree, tree2, sun]
     interactables = [door]
     '''
     MAIN LOOP
