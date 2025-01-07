@@ -125,8 +125,12 @@ def draw_bush(anim, pos, light):
     anim.update()
 
 def draw_sun(anim, pos, light):
-    display.blit(anim.img(), (pos[0]-camera_pos, pos[1]))
-    anim.update()
+    global frame_count
+    time = (frame_count%18000)/18000
+    if time > 0 and time < 9000:
+        pos = (time*320 ,240-math.sin(time*math.pi)*math.sin(time*math.pi)*240)
+        display.blit(anim.img(), (pos[0], pos[1]))
+        anim.update()
 '''
 GAME LOOPS
 '''
@@ -164,7 +168,7 @@ def load_path():
     for i in range(14):
         tree2.anim.update()
         bush2.anim.update()
-    non_interactables = [wizard_tower, bush, bush2, tree, tree2, sun]
+    non_interactables = [wizard_tower, bush, bush2, tree, tree2]
     interactables = [door]
     '''
     MAIN LOOP
@@ -180,6 +184,7 @@ def load_path():
         interactions = []
         lighting.fill((100+50*timedecimal,100+50*timedecimal,100+50*timedecimal))
         display.fill(Utils.get_day_night_cycle_color(time))
+        draw_sun(sun.anim, sun.pos, sun.light)
         display.blit(path_bg, (0-camera_pos,0))
         for non_interactable in non_interactables:
             non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
