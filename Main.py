@@ -2,8 +2,8 @@ import pygame, Utils, sys, math, time as T
 from Animation import Animation
 
 class Player:
-    def __init__(self, anim):
-        self.pos = (70,180)
+    def __init__(self, anim, pos=(70,180)):
+        self.pos = pos 
         self.anim = anim
     def draw(self, display):
         display.blit(self.anim.img(), (self.pos[0]- camera_pos, self.pos[1]))
@@ -46,7 +46,7 @@ def text_scene(text, character):
                 run = False
 
             elif 6 < i:
-                current_text = text[:16]
+                current_text = text[:17]
                 current_text2 = text[17:]
                 i = len(text)
         for event in pygame.event.get():
@@ -86,7 +86,9 @@ def draw_important_potion(anim, pos, light):
     anim.update()
 
 def important_potion_interact():
-    pass
+    wizard = Utils.load_image("assets/sprites/wizard face.png")
+    text_scene("mysterious glow", wizard)
+    text_scene("why would i make this?", wizard)
 
 def draw_caludron(anim, pos, light):
     display.blit(anim.img(), (pos[0]- camera_pos, pos[1]))
@@ -144,13 +146,103 @@ def state_loop():
             next_state = load_path()
         elif next_state == "exit":
             sys.exit(0)
+        elif next_state == "town":
+            next_state = load_town()
 
+def load_town():
+    '''
+    LOAD TOWN 
+    '''
+    global frame_count, camera_pos, T, player
+    wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
+    wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
+    wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
+    sun = non_Interactable(Animation([Utils.load_image("assets/sprites/sun.png")], img_dur=99), draw_sun, (300,40), None)
+    path_bg = Utils.load_image("assets/backgrounds/path bg.png")
+    state = None
+    non_interactables = []
+    interactables = []
+    '''
+    MAIN LOOP
+    '''
+    T.sleep(0.1)
+    running = True
+    while running:
+        '''
+        DRAW
+        '''
+        time = (frame_count%18000)/18000
+        timedecimal = math.sin((time-0.05)*math.pi)
+        interactions = []
+        lighting.fill((100+50*timedecimal,100+50*timedecimal,100+50*timedecimal))
+        display.fill(Utils.get_day_night_cycle_color(time))
+        draw_sun(sun.anim, sun.pos, sun.light)
+        display.blit(path_bg, (0-camera_pos,0))
+        for non_interactable in non_interactables:
+            non_interactable.draw(non_interactable.anim, non_interactable.pos, non_interactable.light)
+        for interactable in interactables:
+            interactable.draw(interactable.anim, interactable.pos, interactable.light)
+            if(pygame.mask.from_surface(interactable.anim.img()).overlap_mask(pygame.mask.from_surface(player.anim.img()), (interactable.pos[0]-player.pos[0],0)).count()):
+                interactions = [interactable]
+        player.draw(display)
+        screen.blit(pygame.transform.scale(display, screen.get_size()), (0,0))
+        screen.blit(lighting, (0,0), special_flags=pygame.BLEND_RGB_MULT)
+        for interactable in interactions:
+            pygame.draw.rect(screen, (255,255,255), ((interactable.pos[0]-camera_pos)*w_ratio,interactable.pos[1]*h_ratio, 50, 50), 5)
+            screen.blit(font.render("F", False, (255,255,255)),((interactable.pos[0]-camera_pos)*w_ratio + 15,interactable.pos[1]*h_ratio + 15))
+        pygame.display.flip()
+
+        '''
+        ACTIONS
+        '''
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                sys.exit()
+            if event.type == pygame.MOUSEBUTTONDOWN:
+                pass
+      
+        keys = pygame.key.get_pressed()          
+        if keys[pygame.K_ESCAPE]:
+            return "exit"
+        if keys[pygame.K_a]:
+            player.anim = wizard_walk_left
+            if player.pos[0] > 0:
+                player.pos = (player.pos[0] - 1,player.pos[1])
+        elif keys[pygame.K_d]:
+            player.anim = wizard_walk_right
+            if player.pos[0] < 500:
+                player.pos = (player.pos[0] + 1,player.pos[1])
+        elif player.anim != wizard_idle:
+            player.anim = wizard_idle
+        if keys[pygame.K_f]:
+            for interaction in interactions:
+                result = interaction.func()
+                if result is not None:
+                    state = result
+        '''
+        CAMERA MOVEMENT
+        '''
+        if abs(player.pos[0] - camera_pos - 100) > 50:
+            camera_pos += math.floor((player.pos[0] - camera_pos - 100) * 0.01)
+            if camera_pos < 0:
+                camera_pos = 0
+            elif camera_pos > 180:
+                camera_pos = 180
+        '''
+        OTHER CALCULATIONS
+        '''
+        if player.pos[0] <= 0:
+            player.pos = (450, 180)
+            camera_pos = 450
+            return "path"
+        frame_count += 1
+        clock.tick(60)
 
 def load_path():
     '''
     LOAD PATH
     '''
-    global frame_count, camera_pos, T
+    global frame_count, camera_pos, T, player
     wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
     wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
     wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
@@ -163,7 +255,6 @@ def load_path():
     tree2 = non_Interactable(Animation(Utils.load_images("assets/sprites/tree1"), img_dur=7), draw_bush, (350, 114), None)
     sun = non_Interactable(Animation([Utils.load_image("assets/sprites/sun.png")], img_dur=99), draw_sun, (300,40), None)
     path_bg = Utils.load_image("assets/backgrounds/path bg.png")
-    player = Player(wizard_idle)
     state = None
     for i in range(14):
         tree2.anim.update()
@@ -214,7 +305,8 @@ def load_path():
             return "exit"
         if keys[pygame.K_a]:
             player.anim = wizard_walk_left
-            player.pos = (player.pos[0] - 1,player.pos[1])
+            if player.pos[0] > 0:
+                player.pos = (player.pos[0] - 1,player.pos[1])
         elif keys[pygame.K_d]:
             player.anim = wizard_walk_right
             player.pos = (player.pos[0] + 1,player.pos[1])
@@ -240,7 +332,13 @@ def load_path():
         OTHER CALCULATIONS
         '''
         if state == "room":
+            player.pos = (70, 180)
+            camera_pos = 70 
             return "room"
+        if player.pos[0] >= 500:
+            player.pos = (70, 180)
+            camera_pos = 70 
+            return "town"
         frame_count += 1
 
 
@@ -248,7 +346,7 @@ def load_room():
     '''
     LOAD ROOM
     '''
-    global camera_pos, frame_count
+    global camera_pos, frame_count, player
     room_bg = Utils.load_image("assets/backgrounds/room.png")
     wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
     wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
@@ -257,7 +355,6 @@ def load_room():
     orb_idle = Animation(Utils.load_images("assets/sprites/orb/idle"), img_dur=8)
     important_potion_idle = Animation(Utils.load_images("assets/sprites/important potion/idle"), img_dur=6)
     door_img = Animation([Utils.load_image("assets/sprites/door.png")])
-    player = Player(wizard_idle)
     state = None
 
     '''
@@ -339,10 +436,12 @@ def load_room():
             return "exit"
         if keys[pygame.K_a]:
             player.anim = wizard_walk_left
-            player.pos = (player.pos[0] - 1,player.pos[1])
+            if player.pos[0] > 0:
+                player.pos = (player.pos[0] - 1,player.pos[1])
         elif keys[pygame.K_d]:
             player.anim = wizard_walk_right
-            player.pos = (player.pos[0] + 1,player.pos[1])
+            if player.pos[0] < 360:
+                player.pos = (player.pos[0] + 1,player.pos[1])
         elif player.anim != wizard_idle:
             player.anim = wizard_idle
         if keys[pygame.K_f]:
@@ -365,6 +464,8 @@ def load_room():
         OTHER CALCULATIONS
         '''
         if state == "path":
+            player.pos = (70, 180)
+            camera_pos = 70 
             return "path"
         frame_count += 1
 
@@ -382,6 +483,8 @@ font = pygame.font.Font("assets/fonts/kongtext.ttf", 24)
 camera_pos = 0
 frame_count = 0
 text_box = Utils.load_image("assets/sprites/text box.png")
+wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
+player = Player(wizard_idle)
 
 '''
 MENU SCREEN
@@ -423,4 +526,3 @@ while running:
     if keys[pygame.K_ESCAPE]:
         running = False
         clock.tick(60)
-
