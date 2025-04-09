@@ -1,5 +1,6 @@
 import pygame, Utils, sys, math, time as T
 from Animation import Animation
+import Quests
 
 class Player:
     def __init__(self, anim, pos=(70,180)):
@@ -162,6 +163,10 @@ def load_town():
     state = None
     non_interactables = []
     interactables = []
+    Quests.gone_to_town = True
+    for quest in current_quests:
+        quest.updateState()
+        print(quest.state)
     '''
     MAIN LOOP
     '''
@@ -485,6 +490,8 @@ frame_count = 0
 text_box = Utils.load_image("assets/sprites/text box.png")
 wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
 player = Player(wizard_idle)
+current_quests = [Quests.MainQuest(None, None, "travel")]
+current_quests[0].updateState()
 
 '''
 MENU SCREEN
