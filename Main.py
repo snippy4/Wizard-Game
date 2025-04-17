@@ -194,9 +194,6 @@ def load_town():
     LOAD TOWN 
     '''
     global frame_count, camera_pos, T, player
-    wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
-    wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
-    wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
     sun = non_Interactable(Animation([Utils.load_image("assets/sprites/sun.png")], img_dur=99), draw_sun, (300,40), None)
     path_bg = Utils.load_image("assets/backgrounds/path bg.png")
     state = None
