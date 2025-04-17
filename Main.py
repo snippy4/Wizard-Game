@@ -26,6 +26,34 @@ class non_Interactable:
         self.pos = pos
         self.light = light
 
+def key_presses(interactions, state):
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            sys.exit()
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            pass
+    
+    keys = pygame.key.get_pressed()          
+    if keys[pygame.K_ESCAPE]:
+        state = "exit"
+    if keys[pygame.K_e]:
+        quest_screen()
+    if keys[pygame.K_a]:
+        player.anim = wizard_walk_left
+        if player.pos[0] > 0:
+            player.pos = (player.pos[0] - 1,player.pos[1])
+    elif keys[pygame.K_d]:
+        player.anim = wizard_walk_right
+        player.pos = (player.pos[0] + 1,player.pos[1])
+    elif player.anim != wizard_idle:
+        player.anim = wizard_idle
+    if keys[pygame.K_f]:
+        for interaction in interactions:
+            result = interaction.func()
+            if result is not None:
+                state = result
+    return state
+
 def text_scene(text, character):
     run = True
     current_text = ""
@@ -61,7 +89,18 @@ def text_scene(text, character):
         i += 1
         clock.tick(20)
     
-
+def quest_screen():
+    run = True
+    quests_background = Utils.load_image("assets/sprites/quests.png")
+    while run:
+        screen.blit(pygame.transform.scale(quests_background, (screen.get_width(), screen.get_height())), (0, 0))
+        pygame.display.flip()
+        keys = pygame.key.get_pressed()
+        if keys[pygame.K_RETURN] or keys[pygame.K_ESCAPE]:
+            run = False
+        for event in pygame.event.get():
+            pass
+        clock.tick(20)
 '''
 ROOM FUNCTIONS
 '''
@@ -200,30 +239,7 @@ def load_town():
         '''
         ACTIONS
         '''
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
-      
-        keys = pygame.key.get_pressed()          
-        if keys[pygame.K_ESCAPE]:
-            return "exit"
-        if keys[pygame.K_a]:
-            player.anim = wizard_walk_left
-            if player.pos[0] > 0:
-                player.pos = (player.pos[0] - 1,player.pos[1])
-        elif keys[pygame.K_d]:
-            player.anim = wizard_walk_right
-            if player.pos[0] < 500:
-                player.pos = (player.pos[0] + 1,player.pos[1])
-        elif player.anim != wizard_idle:
-            player.anim = wizard_idle
-        if keys[pygame.K_f]:
-            for interaction in interactions:
-                result = interaction.func()
-                if result is not None:
-                    state = result
+        state = key_presses(interactions, state)
         '''
         CAMERA MOVEMENT
         '''
@@ -248,9 +264,6 @@ def load_path():
     LOAD PATH
     '''
     global frame_count, camera_pos, T, player
-    wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
-    wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
-    wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
     wizard_tower = non_Interactable(Animation(Utils.load_images("assets/sprites/tower/idle"), img_dur=6), draw_tower, (40, -12), None)
     door_img = Animation([Utils.load_image("assets/sprites/door.png")])
     door = Interactable(door_img, path_door_interact, draw_door, (60,165), None)
@@ -299,29 +312,7 @@ def load_path():
         '''
         ACTIONS
         '''
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
-      
-        keys = pygame.key.get_pressed()          
-        if keys[pygame.K_ESCAPE]:
-            return "exit"
-        if keys[pygame.K_a]:
-            player.anim = wizard_walk_left
-            if player.pos[0] > 0:
-                player.pos = (player.pos[0] - 1,player.pos[1])
-        elif keys[pygame.K_d]:
-            player.anim = wizard_walk_right
-            player.pos = (player.pos[0] + 1,player.pos[1])
-        elif player.anim != wizard_idle:
-            player.anim = wizard_idle
-        if keys[pygame.K_f]:
-            for interaction in interactions:
-                result = interaction.func()
-                if result is not None:
-                    state = result
+        state = key_presses(interactions, state)
         '''
         CAMERA MOVEMENT
         '''
@@ -344,6 +335,8 @@ def load_path():
             player.pos = (70, 180)
             camera_pos = 70 
             return "town"
+        if state == "exit":
+            return "exit"
         frame_count += 1
 
 
@@ -353,9 +346,6 @@ def load_room():
     '''
     global camera_pos, frame_count, player
     room_bg = Utils.load_image("assets/backgrounds/room.png")
-    wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
-    wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
-    wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
     cauldron_idle = Animation(Utils.load_images("assets/sprites/cauldron/idle"), img_dur=6)
     orb_idle = Animation(Utils.load_images("assets/sprites/orb/idle"), img_dur=8)
     important_potion_idle = Animation(Utils.load_images("assets/sprites/important potion/idle"), img_dur=6)
@@ -430,30 +420,8 @@ def load_room():
         '''
         ACTIONS
         '''
-        for event in pygame.event.get():
-            if event.type == pygame.QUIT:
-                sys.exit()
-            if event.type == pygame.MOUSEBUTTONDOWN:
-                pass
-      
-        keys = pygame.key.get_pressed()          
-        if keys[pygame.K_ESCAPE]:
-            return "exit"
-        if keys[pygame.K_a]:
-            player.anim = wizard_walk_left
-            if player.pos[0] > 0:
-                player.pos = (player.pos[0] - 1,player.pos[1])
-        elif keys[pygame.K_d]:
-            player.anim = wizard_walk_right
-            if player.pos[0] < 360:
-                player.pos = (player.pos[0] + 1,player.pos[1])
-        elif player.anim != wizard_idle:
-            player.anim = wizard_idle
-        if keys[pygame.K_f]:
-            for interaction in interactions:
-                result = interaction.func()
-                if result is not None:
-                    state = result
+        state = key_presses(interactions, state)
+
         '''
         CAMERA MOVEMENT
         '''
@@ -472,6 +440,8 @@ def load_room():
             player.pos = (70, 180)
             camera_pos = 70 
             return "path"
+        if state == "exit":
+            return "exit"
         frame_count += 1
 
 pygame.init()
@@ -490,6 +460,9 @@ frame_count = 0
 text_box = Utils.load_image("assets/sprites/text box.png")
 wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
 player = Player(wizard_idle)
+wizard_idle = Animation(Utils.load_images("assets/sprites/wizard/idle"), img_dur=6)
+wizard_walk_left = Animation(Utils.load_images("assets/sprites/wizard/walk left"), img_dur=4)
+wizard_walk_right = Animation(Utils.load_images("assets/sprites/wizard/walk right"), img_dur=4)
 current_quests = [Quests.MainQuest(None, None, "travel")]
 current_quests[0].updateState()
 
