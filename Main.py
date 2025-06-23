@@ -180,6 +180,7 @@ GAME LOOPS
 def state_loop():
     next_state = "room"
     while True:
+        T.sleep(0.2)
         if next_state == "room":
             next_state = load_room()
         elif next_state == "path":
